@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  // directUrl = env("DATABASE_URL_UNPOOLED")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  credits   Int      @default(0)
+  createdAt DateTime @default(now())
+  reports   Report[]
+  purchases Purchase[]
+}
+
+model Event {
+  id        String   @id @default(cuid())
+  name      String
+  location  String?
+  startDate DateTime?
+  endDate   DateTime?
+  category  String?
+  createdAt DateTime @default(now())
+  reports   Report[]
+}
+
+model Report {
+  id           String   @id @default(cuid())
+  userId       String?
+  eventId      String
+  grossRevenue Float
+  feesPaid     Float    @default(0)
+  hoursWorked  Float?
+
+  date         DateTime?
+  notes        String?
+  createdAt    DateTime @default(now())
+
+  user  User?  @relation(fields: [userId], references: [id])
+  event Event  @relation(fields: [eventId], references: [id])
+}
+
+model Purchase {
+  id        String   @id @default(cuid())
+  userId    String
+  credits   Int
+  amount    Int      // cents
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
